@@ -1,8 +1,11 @@
 #include <stdio.h>
 
+void take_input();
+
+
 void print_board(int *bp_ptr)
 {
-    printf("\n ------");
+    printf("\n------");
 
     int i;
     for (i = 0; i < 25; ++i)
@@ -14,13 +17,30 @@ void print_board(int *bp_ptr)
         printf("%d", bp_ptr[i]);
     }
 
-    printf("\n ------");
-    printf("\n Pawn = 1, Rook = 2, Knight = 3, Bishop = 4, Queen = 5, King = 6");
+    printf("\n------");
+    printf("\nPawn = 1, Rook = 2, Knight = 3, Bishop = 4, Queen = 5, King = 6");
+    take_input();
 }
 
-int take_input()
-{
-    return 0;
+void take_input()
+{    
+    int row, column;
+    printf("\n------");
+
+    // TODO: Input validation
+
+    printf("\nYou want to move the piece on row... ");
+    scanf("%d", &row);
+
+    printf("\nYou want to move the piece on column... ");
+    scanf("%d", &column);
+
+    // TODO:
+    // Use int row and int column to find the piece from 0-24
+    // Return the position of the piece and whether it is valid to move
+
+    printf("%d %d", row, column);
+
 }
 
 int *set_pieces(int piece, int position, int *bp_ptr, char is_setup)
@@ -43,6 +63,8 @@ int *set_pieces(int piece, int position, int *bp_ptr, char is_setup)
 
 int main(void)
 {
+    setvbuf(stdout, NULL, _IONBF, 0);
+    printf("running");
     // 0 is top left, 4 is top right, 5 is below top left, 9 is below top right...
     // 20 is the bottom left, 24 is the bottom right
     // Pawn = 1, Rook = 2, Knight = 3, Bishop = 4, Queen = 5, King = 6
