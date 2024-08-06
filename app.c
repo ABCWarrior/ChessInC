@@ -1,8 +1,9 @@
 #include <stdio.h>
+#include <ctype.h>
 
-void take_input(char *bp_ptr);
+void take_input(char *bp_ptr, int turn);
 
-void print_board(char *bp_ptr)
+void print_board(char *bp_ptr, int turn)
 {
     printf("\n------");
 
@@ -22,10 +23,10 @@ void print_board(char *bp_ptr)
     printf("\n p = pawn, k = king, q = queen, b = bishop, n = knight, r = rook : Lowercase is Black, Caps are White");
 
     // After printing, asks for input
-    take_input(bp_ptr);
+    take_input(bp_ptr, turn);
 }
 
-void take_input(char *bp_ptr)
+void take_input(char *bp_ptr, int turn)
 {
     int row, column, selected;
 
@@ -44,13 +45,33 @@ void take_input(char *bp_ptr)
     
     // TODO:
     // Return the position of the piece and whether it is valid to move
+
     if(selected != 'e'){
-        printf("valid until black white stuff comes in")
+
+        // Confirmed is a piece
+
+        int temp_int = turn%2;
+
+        // WHITE TURN
+        if(temp_int == 1){
+            if(isupper(selected)){
+                printf("%c is valid", selected);
+                return;
+            }
+        }
+
+        // BLACK TURN
+        else{
+            if(isupper(selected)){
+                printf("%c is valid", selected);
+                return;
+            }
+        }
     }
 
-    // Prints out whatever found (just a test)
-    printf("%c", selected);
-
+    // ONLY ACCESSED IF PIECE WAS NOT VALID
+    printf("invalid piece");
+    take_input(bp_ptr, turn);
 }
 
 char *set_pieces(char piece, int position, char *bp_ptr, char is_setup)
@@ -88,9 +109,11 @@ int main(void)
     // 0 is top left, 4 is top right, 5 is below top left, 9 is below top right...
     // 20 is the bottom left, 24 is the bottom right
     // Pawn = 1, Rook = 2, Knight = 3, Bishop = 4, Queen = 5, King = 6
-    int board_pieces[25];
+    char board_pieces[25];
     char *bp_ptr = board_pieces;
     set_pieces('e', 0, bp_ptr, 'y');
+
+    int turnnumber = 1;
 
     int i;
 
@@ -115,11 +138,7 @@ int main(void)
     set_pieces('Q', 23, bp_ptr, 'n');
     set_pieces('K', 24, bp_ptr, 'n');
 
-    print_board(bp_ptr);
+    print_board(bp_ptr, turnnumber);
 
     return 0;
-}
-
-void eligible_bishop_moves(){
-    //
 }
