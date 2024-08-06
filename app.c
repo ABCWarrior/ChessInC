@@ -1,7 +1,17 @@
 #include <stdio.h>
 #include <ctype.h>
 
-void take_input(char *bp_ptr, int turn);
+// Function prototypes
+void take_selection_input(char *bp_ptr, int turn);
+int white_pawn_movement(char *bp_ptr, int location, int destination);
+int black_pawn_movement(char *bp_ptr, int location, int destination);
+int rook_movement(char *bp_ptr, int location, int destination);
+int knight_movement(char *bp_ptr, int location, int destination);
+int bishop_movement(char *bp_ptr, int location, int destination);
+int queen_movement(char *bp_ptr, int location, int destination);
+int king_movement(char *bp_ptr, int location, int destination);
+void take_movement_input(char *bp_ptr, int location, int turn);
+int valid_movement(char *bp_ptr, int location, int destination, int turn);
 
 void print_board(char *bp_ptr, int turn)
 {
@@ -23,10 +33,10 @@ void print_board(char *bp_ptr, int turn)
     printf("\n p = pawn, k = king, q = queen, b = bishop, n = knight, r = rook : Lowercase is Black, Caps are White");
 
     // After printing, asks for input
-    take_input(bp_ptr, turn);
+    take_selection_input(bp_ptr, turn);
 }
 
-void take_input(char *bp_ptr, int turn)
+void take_selection_input(char *bp_ptr, int turn)
 {
     int row, column, selected;
 
@@ -41,29 +51,38 @@ void take_input(char *bp_ptr, int turn)
     scanf("%d", &column);
 
     // Use int row and int column to find the piece from 0-24
-    selected = bp_ptr[(row-1)*5 + (column-1)];
-    
+    selected = bp_ptr[(row - 1) * 5 + (column - 1)];
+
     // TODO:
     // Return the position of the piece and whether it is valid to move
 
-    if(selected != 'e'){
+    if (selected != 'e')
+    {
 
         // Confirmed is a piece
 
-        int temp_int = turn%2;
+        int temp_int = turn % 2;
 
         // WHITE TURN
-        if(temp_int == 1){
-            if(isupper(selected)){
+        if (temp_int == 1)
+        {
+            if (isupper(selected))
+            {
                 printf("%c is valid", selected);
+                // IF IT IS VALID, MOVE TO NEXT STEP; DECIDING WHERE TO MOVE
+                take_movement_input(bp_ptr, ((row - 1) * 5 + (column - 1)), turn);
                 return;
             }
         }
 
         // BLACK TURN
-        else{
-            if(isupper(selected)){
+        else
+        {
+            if (!isupper(selected))
+            {
                 printf("%c is valid", selected);
+                // IF IT IS VALID, MOVE TO NEXT STEP; DECIDING WHERE TO MOVE
+                take_movement_input(bp_ptr, ((row - 1) * 5 + (column - 1)), turn);
                 return;
             }
         }
@@ -71,7 +90,33 @@ void take_input(char *bp_ptr, int turn)
 
     // ONLY ACCESSED IF PIECE WAS NOT VALID
     printf("invalid piece");
-    take_input(bp_ptr, turn);
+    take_selection_input(bp_ptr, turn);
+}
+
+void take_movement_input(char *bp_ptr, int location, int turn)
+{
+    int destination;
+
+    printf("\nWhere do you want to move? (Using int for now for simplicity)\n");
+
+    scanf("%d", &destination);
+
+    int validity = valid_movement(bp_ptr, location, destination, turn);
+
+    if (validity == 1)
+    {
+        printf("\nMovement success, change to next turn\n");
+        turn += 1;
+        print_board(bp_ptr, turn);
+    }
+    else if (validity == 0)
+    {
+        printf("\nMovement failure, retry");
+    }
+    else
+    {
+        printf("\n ALERT! CODE FAILURE IN MOVEMENT RETURN!");
+    }
 }
 
 char *set_pieces(char piece, int position, char *bp_ptr, char is_setup)
@@ -103,7 +148,7 @@ char *set_pieces(char piece, int position, char *bp_ptr, char is_setup)
 
 int main(void)
 {
-    // Switched smtn to remove the buffer from stdout 
+    // Switched smtn to remove the buffer from stdout
     setvbuf(stdout, NULL, _IONBF, 0);
 
     // 0 is top left, 4 is top right, 5 is below top left, 9 is below top right...
@@ -141,4 +186,192 @@ int main(void)
     print_board(bp_ptr, turnnumber);
 
     return 0;
+}
+
+int valid_movement(char *bp_ptr, int location, int destination, int turn)
+{
+
+    // We setup "temp_piece" since all pieces move the same for black and white except the pawns
+    char temp_piece;
+
+    if (bp_ptr[location] == 'p' || bp_ptr[location] == 'P')
+    {
+        temp_piece = bp_ptr[location];
+    }
+    else
+    {
+        temp_piece = toupper(bp_ptr[location]);
+    }
+
+    // TODO: CHECK AND MAKE SURE DESTINATION IS WITHIN 0 TO 24
+
+    switch (temp_piece)
+    {
+    case 'p':
+        return black_pawn_movement(bp_ptr, location, destination);
+
+    case 'P':
+        return white_pawn_movement(bp_ptr, location, destination);
+
+    case 'R':
+        return rook_movement(bp_ptr, location, destination);
+
+    case 'N':
+        return knight_movement(bp_ptr, location, destination);
+
+    case 'B':
+        return bishop_movement(bp_ptr, location, destination);
+
+    case 'Q':
+        return queen_movement(bp_ptr, location, destination);
+
+    case 'K':
+        return king_movement(bp_ptr, location, destination);
+
+    default:
+        printf("ERROR: UNMATCHED PIECE MOVEMENT");
+    }
+}
+
+int white_pawn_movement(char *bp_ptr, int location, int destination)
+{
+    // CHECK IF DESTINATION IS LOGICAL (STRAIGHT UP), IF IT IS WITHIN BOUNDS, AND IF IT IS EMPTY
+    if (destination == location - 5 && 0 <= (location - 5) && (location - 5) <= 24 && bp_ptr[location - 5] == 'e')
+    {
+        bp_ptr[location] = 'e';
+        bp_ptr[destination] = 'P';
+        return 1;
+    }
+    // CHECK IF DESTINATION IS LOGICAL (DIAGONAL RIGHT), IF IT IS WITHIN BOUNDS, AND IF IT HAS A PIECE
+    else if (destination == location - 4 && 0 <= (location - 4) && (location - 4) <= 24 && bp_ptr[location - 4] != 'e')
+    {
+        // TODO: ADD A CHECK IF IT WAS KING THAT WAS SWALLOWED
+        bp_ptr[location] = 'e';
+        bp_ptr[destination] = 'P';
+        return 1;
+    }
+    // CHECK IF DESTINATION IS LOGICAL (DIAGONAL LEFT), IF IT IS WITHIN BOUNDS, AND IF IT HAS A PIECE
+    else if (destination == location - 6 && 0 <= (location - 6) && (location - 6) <= 24 && bp_ptr[location - 6] != 'e')
+    {
+        // TODO: ADD A CHECK IF IT WAS KING THAT WAS SWALLOWED
+        bp_ptr[location] = 'e';
+        bp_ptr[destination] = 'P';
+        return 1;
+    }
+    else
+    {
+        return 0;
+    }
+}
+
+int black_pawn_movement(char *bp_ptr, int location, int destination)
+{
+    // CHECK IF DESTINATION IS LOGICAL (STRAIGHT DOWN), IF IT IS WITHIN BOUNDS, AND IF IT IS EMPTY
+    if (destination == location + 5 && 0 <= (location + 5) && (location + 5) <= 24 && bp_ptr[location + 5] == 'e')
+    {
+        bp_ptr[location] = 'e';
+        bp_ptr[destination] = 'p';
+        return 1;
+    }
+    // CHECK IF DESTINATION IS LOGICAL (DIAGONAL LEFT), IF IT IS WITHIN BOUNDS, AND IF IT HAS A PIECE
+    else if (destination == location + 4 && 0 <= (location + 4) && (location + 4) <= 24 && bp_ptr[location + 4] != 'e')
+    {
+        // TODO: ADD A CHECK IF IT WAS KING OR AN OWN PIECE THAT WAS SWALLOWED
+        bp_ptr[location] = 'e';
+        bp_ptr[destination] = 'p';
+        return 1;
+    }
+    // CHECK IF DESTINATION IS LOGICAL (DIAGONAL RIGHT), IF IT IS WITHIN BOUNDS, AND IF IT HAS A PIECE
+    else if (destination == location + 6 && 0 <= (location + 6) && (location + 6) <= 24 && bp_ptr[location + 6] != 'e')
+    {
+        // TODO: ADD A CHECK IF IT WAS KING OR AN OWN PIECE THAT WAS SWALLOWED
+        bp_ptr[location] = 'e';
+        bp_ptr[destination] = 'p';
+        return 1;
+    }
+    else
+    {
+        return 0;
+    }
+}
+
+int rook_movement(char *bp_ptr, int location, int destination)
+{
+    // VERTICAL CHECK
+    if (destination % 5 == location % 5 && destination != location)
+    {
+        // CHECK FOR OBSTACLES IN THE PATH HERE
+        int i;
+        for (i = -6; i < 6; ++i)
+        {
+            int temp_location = abs(location + (5 * i));
+            if (location > destination)
+            {
+                if (location > temp_location && temp_location > destination)
+                {
+                    if (bp_ptr[temp_location] != 'e')
+                    {
+                        printf("error, path not empty");
+                        return 0;
+                    }
+                }
+            }
+            else
+            {
+                if (location < temp_location && temp_location < destination)
+                {
+                    if (bp_ptr[temp_location] != 'e')
+                    {
+                        printf("error, path not empty");
+                        return 0;
+                    }
+                }
+            }
+        }
+
+        // TODO: CHECK IF YOU ARE EATING YOUR OWN PIECE OR KING AND THROW ERROR
+        
+
+        // IF NO ERRORS HAPPENED IN THE VERTICAL MOVEMENT, YOU CAN MOVE
+        bp_ptr[destination] = bp_ptr[location];
+        bp_ptr[location] = 'e';
+
+        // RETURN SUCCESS
+        return 1;
+    }
+
+    // TODO: HORIZONTAL CHECK
+    else if (destination != location && ((location/5) == (destination/5)))
+    {
+        // TODO: CHECK FOR IN BETWEENS
+
+        // TODO: CHECK IF YOU ARE EATING YOUR OWN PIECE OR KING AND THROW ERROR
+
+        // IF NO ERRORS HAPPENED IN THE VERTICAL MOVEMENT, YOU CAN MOVE
+        bp_ptr[destination] = bp_ptr[location];
+        bp_ptr[location] = 'e';
+
+        // RETURN SUCCESS
+        return 1;
+    }
+    else
+    {
+        return 0;
+    }
+}
+
+int knight_movement(char *bp_ptr, int location, int destination)
+{
+}
+
+int bishop_movement(char *bp_ptr, int location, int destination)
+{
+}
+
+int queen_movement(char *bp_ptr, int location, int destination)
+{
+}
+
+int king_movement(char *bp_ptr, int location, int destination)
+{
 }
