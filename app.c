@@ -30,16 +30,22 @@ void print_board(char *bp_ptr, int turn)
         if (i % 5 == 0)
         {
             printf("\n");
-            printf("%d ", ((i/5)+1));
-
+            printf("%d ", ((i / 5) + 1));
         }
         printf("%c ", bp_ptr[i]);
     }
 
     // Information about int -> piece here
     printf("\n-------------");
-    printf("\n p = pawn, k = king, q = queen, b = bishop, n = knight, r = rook : Lowercase is Black, Caps are White");
-
+    printf("\np = pawn, k = king, q = queen, b = bishop, n = knight, r = rook : Lowercase is Black, Caps are White");
+    if(turn%2 == 0)
+    {
+        printf("\nBLACK PLAYER TURN");
+    }
+    else
+    {
+        printf("\nWHITE PLAYER TURN");
+    }
     // After printing, asks for input
     take_selection_input(bp_ptr, turn);
 }
@@ -52,11 +58,45 @@ void take_selection_input(char *bp_ptr, int turn)
 
     // TODO: Input validation
 
-    printf("\nYou want to move the piece on row... ");
-    scanf("%d", &row);
+    char input[3];
 
-    printf("\nYou want to move the piece on column... ");
-    scanf("%d", &column);
+    printf("\nChoose a piece to move (EX: A4)\n");
+
+    scanf("%2s", input);
+
+    if (input[0] == 'A')
+    {
+        column = 1;
+    }
+    else if (input[0] == 'B')
+    {
+        column = 2;
+    }
+    else if (input[0] == 'C')
+    {
+        column = 3;
+    }
+    else if (input[0] == 'D')
+    {
+        column = 4;
+    }
+    else if (input[0] == 'E')
+    {
+        column = 5;
+    }
+    else
+    {
+        printf("Error with input, choose a piece to move again");
+        take_selection_input(bp_ptr, turn);
+    }
+
+    row = atoi(&input[1]); // The remaining part is the number
+
+    if (row > 5 || row < 0)
+    {
+        printf("Error with input, choose a piece to move again");
+        take_selection_input(bp_ptr, turn);
+    }
 
     // Use int row and int column to find the piece from 0-24
     selected = bp_ptr[(row - 1) * 5 + (column - 1)];
@@ -105,21 +145,60 @@ void take_movement_input(char *bp_ptr, int location, int turn)
 {
     int destination;
 
-    printf("\nWhere do you want to move? (Using int for now for simplicity)\n");
+    int row;
+    int column;
 
-    scanf("%d", &destination);
+    printf("\nWhere do you want to move? Choose a piece (EX: A3)\n");
 
-    int validity = valid_movement(bp_ptr, location, destination, turn);
+    char input[3];
+
+    scanf("%2s", input);
+
+    if (input[0] == 'A')
+    {
+        column = 1;
+    }
+    else if (input[0] == 'B')
+    {
+        column = 2;
+    }
+    else if (input[0] == 'C')
+    {
+        column = 3;
+    }
+    else if (input[0] == 'D')
+    {
+        column = 4;
+    }
+    else if (input[0] == 'E')
+    {
+        column = 5;
+    }
+    else
+    {
+        printf("Error with input, choose a piece to move again");
+        take_selection_input(bp_ptr, turn);
+    }
+
+    row = atoi(&input[1]); // The remaining part is the number
+
+    if (row > 5 || row < 0)
+    {
+        printf("Error with input, choose a piece to move again");
+        take_selection_input(bp_ptr, turn);
+    }
+
+    int validity = valid_movement(bp_ptr, location, ret_int(row, column), turn);
 
     if (validity == 1)
     {
-        printf("\nMovement success, change to next turn\n");
         turn += 1;
         print_board(bp_ptr, turn);
     }
     else if (validity == 0)
     {
-        printf("\nMovement failure, retry");
+        printf("\nError with input, choose a piece to move again");
+        take_selection_input(bp_ptr, turn);
     }
     else
     {
@@ -275,7 +354,7 @@ int white_pawn_movement(char *bp_ptr, int l_row, int l_col, int d_row, int d_col
             // CHECK IF IT WAS OWN PIECE THAT WAS SWALLOWED
             if (isupper(bp_ptr[destination]) == isupper(bp_ptr[location]))
             {
-                printf("\n cant eat teammates \n");
+                printf("\nCan't attack own pieces!\n");
                 return 0;
             }
 
@@ -315,7 +394,7 @@ int black_pawn_movement(char *bp_ptr, int l_row, int l_col, int d_row, int d_col
             // CHECK IF IT WAS OWN PIECE THAT WAS SWALLOWED
             if (isupper(bp_ptr[destination]) == isupper(bp_ptr[location]))
             {
-                printf("\n cant eat teammates \n");
+                printf("\nCan't attack own pieces!\n");
                 return 0;
             }
 
@@ -372,7 +451,7 @@ int rook_movement(char *bp_ptr, int l_row, int l_col, int d_row, int d_col)
         // CHECK IF IT WAS OWN PIECE THAT WAS SWALLOWED
         if (isupper(bp_ptr[destination]) == isupper(bp_ptr[location]))
         {
-            printf("\n cant eat teammates \n");
+            printf("\nCan't attack own pieces!\n");
             return 0;
         }
 
@@ -389,7 +468,6 @@ int rook_movement(char *bp_ptr, int l_row, int l_col, int d_row, int d_col)
     }
     else if (l_col == d_col)
     {
-        printf("same column");
         int going_up;
         if (l_row > d_row)
         {
@@ -421,7 +499,7 @@ int rook_movement(char *bp_ptr, int l_row, int l_col, int d_row, int d_col)
         // CHECK IF IT WAS OWN PIECE THAT WAS SWALLOWED
         if (isupper(bp_ptr[destination]) == isupper(bp_ptr[location]))
         {
-            printf("\n cant eat teammates \n");
+            printf("\nCan't attack own pieces!\n");
             return 0;
         }
 
@@ -451,7 +529,7 @@ int knight_movement(char *bp_ptr, int location, int destination)
         // CHECK IF IT WAS OWN PIECE THAT WAS SWALLOWED
         if (isupper(bp_ptr[destination]) == isupper(bp_ptr[location]))
         {
-            printf("\n cant eat teammates \n");
+            printf("\nCan't attack own pieces!\n");
             return 0;
         }
 
@@ -546,7 +624,7 @@ int bishop_movement(char *bp_ptr, int l_row, int l_col, int d_row, int d_col)
         // CHECK IF IT WAS OWN PIECE THAT WAS SWALLOWED
         if (isupper(bp_ptr[destination]) == isupper(bp_ptr[location]))
         {
-            printf("\n cant eat teammates \n");
+            printf("\nCan't attack own pieces!\n");
             return 0;
         }
 
@@ -610,7 +688,7 @@ int queen_movement(char *bp_ptr, int l_row, int l_col, int d_row, int d_col)
         // CHECK IF IT WAS OWN PIECE THAT WAS SWALLOWED
         if (isupper(bp_ptr[destination]) == isupper(bp_ptr[location]))
         {
-            printf("\n cant eat teammates \n");
+            printf("\nCan't attack own pieces!\n");
             return 0;
         }
 
@@ -659,7 +737,7 @@ int queen_movement(char *bp_ptr, int l_row, int l_col, int d_row, int d_col)
         // CHECK IF IT WAS OWN PIECE THAT WAS SWALLOWED
         if (isupper(bp_ptr[destination]) == isupper(bp_ptr[location]))
         {
-            printf("\n cant eat teammates \n");
+            printf("\nCan't attack own pieces!\n");
             return 0;
         }
 
@@ -741,7 +819,7 @@ int queen_movement(char *bp_ptr, int l_row, int l_col, int d_row, int d_col)
         // CHECK IF IT WAS OWN PIECE THAT WAS SWALLOWED
         if (isupper(bp_ptr[destination]) == isupper(bp_ptr[location]))
         {
-            printf("\n cant eat teammates \n");
+            printf("\nCan't attack own pieces!\n");
             return 0;
         }
 
@@ -767,5 +845,32 @@ int queen_movement(char *bp_ptr, int l_row, int l_col, int d_row, int d_col)
 
 int king_movement(char *bp_ptr, int l_row, int l_col, int d_row, int d_col)
 {
+    int location = ret_int(l_row, l_col);
+    int destination = ret_int(d_row, d_col);
+    
+    if (((d_col-l_col) == 0 || abs(d_col-l_col) == 1) && ((d_row-l_row) == 0 || abs(d_row-l_row) == 1))
+    {
+        // CHECK IF IT WAS OWN PIECE THAT WAS SWALLOWED
+        if (isupper(bp_ptr[destination]) == isupper(bp_ptr[location]))
+        {
+            printf("\nCan't attack own pieces!\n");
+            return 0;
+        }
 
+        // CHECK IF YOU WIN!
+        if (bp_ptr[location] == 'K' || bp_ptr[location] == 'k')
+        {
+            printf("\n WINNER \n");
+            return 0;
+        }
+
+        // IF NO ERRORS HAPPENED IN THE MOVEMENT, YOU CAN MOVE
+        bp_ptr[destination] = bp_ptr[location];
+        bp_ptr[location] = 'x';
+        return 1;
+    }
+    else
+    {
+        return 0;
+    }
 }
