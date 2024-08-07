@@ -3,15 +3,20 @@
 
 // Function prototypes
 void take_selection_input(char *bp_ptr, int turn);
-int white_pawn_movement(char *bp_ptr, int location, int destination);
-int black_pawn_movement(char *bp_ptr, int location, int destination);
-int rook_movement(char *bp_ptr, int location, int destination);
+int white_pawn_movement(char *bp_ptr, int l_row, int l_col, int d_row, int d_col);
+int black_pawn_movement(char *bp_ptr, int l_row, int l_col, int d_row, int d_col);
+int rook_movement(char *bp_ptr, int l_row, int l_col, int d_row, int d_col);
 int knight_movement(char *bp_ptr, int location, int destination);
-int bishop_movement(char *bp_ptr, int location, int destination);
-int queen_movement(char *bp_ptr, int location, int destination);
-int king_movement(char *bp_ptr, int location, int destination);
+int bishop_movement(char *bp_ptr, int l_row, int l_col, int d_row, int d_col);
+int queen_movement(char *bp_ptr, int l_row, int l_col, int d_row, int d_col);
+int king_movement(char *bp_ptr, int l_row, int l_col, int d_row, int d_col);
 void take_movement_input(char *bp_ptr, int location, int turn);
 int valid_movement(char *bp_ptr, int location, int destination, int turn);
+
+int ret_int(int row, int col)
+{
+    return (((row - 1) * 5) + (col - 1));
+}
 
 void print_board(char *bp_ptr, int turn)
 {
@@ -203,158 +208,148 @@ int valid_movement(char *bp_ptr, int location, int destination, int turn)
         temp_piece = toupper(bp_ptr[location]);
     }
 
-    // TODO: CHECK AND MAKE SURE DESTINATION IS WITHIN 0 TO 24
+    int location_row = (location / 5) + 1;
+    int location_col = (location % 5) + 1;
+    int destination_row = (destination / 5) + 1;
+    int destination_col = (destination % 5) + 1;
+
+    // CHECK IF DESTINATION IS VALID
+    if(location == destination){return 0;}
+    if(24 < destination || 0 > destination){return 0;}
 
     switch (temp_piece)
     {
     case 'p':
-        return black_pawn_movement(bp_ptr, location, destination);
+        return black_pawn_movement(bp_ptr, location_row, location_col, destination_row, destination_col);
 
     case 'P':
-        return white_pawn_movement(bp_ptr, location, destination);
+        return white_pawn_movement(bp_ptr, location_row, location_col, destination_row, destination_col);
 
     case 'R':
-        return rook_movement(bp_ptr, location, destination);
+        return rook_movement(bp_ptr, location_row, location_col, destination_row, destination_col);
 
     case 'N':
         return knight_movement(bp_ptr, location, destination);
 
     case 'B':
-        return bishop_movement(bp_ptr, location, destination);
+        return bishop_movement(bp_ptr, location_row, location_col, destination_row, destination_col);
 
     case 'Q':
-        return queen_movement(bp_ptr, location, destination);
+        return queen_movement(bp_ptr, location_row, location_col, destination_row, destination_col);
 
     case 'K':
-        return king_movement(bp_ptr, location, destination);
+        return king_movement(bp_ptr, location_row, location_col, destination_row, destination_col);
 
     default:
         printf("ERROR: UNMATCHED PIECE MOVEMENT");
     }
 }
 
-int white_pawn_movement(char *bp_ptr, int location, int destination)
+int white_pawn_movement(char *bp_ptr, int l_row, int l_col, int d_row, int d_col)
 {
-    // CHECK IF DESTINATION IS LOGICAL (STRAIGHT UP), IF IT IS WITHIN BOUNDS, AND IF IT IS EMPTY
-    if (destination == location - 5 && 0 <= (location - 5) && (location - 5) <= 24 && bp_ptr[location - 5] == 'e')
-    {
-        bp_ptr[location] = 'e';
-        bp_ptr[destination] = 'P';
-        return 1;
-    }
-    // CHECK IF DESTINATION IS LOGICAL (DIAGONAL RIGHT), IF IT IS WITHIN BOUNDS, AND IF IT HAS A PIECE
-    else if (destination == location - 4 && 0 <= (location - 4) && (location - 4) <= 24 && bp_ptr[location - 4] != 'e')
-    {
-        // TODO: ADD A CHECK IF IT WAS KING THAT WAS SWALLOWED
-        bp_ptr[location] = 'e';
-        bp_ptr[destination] = 'P';
-        return 1;
-    }
-    // CHECK IF DESTINATION IS LOGICAL (DIAGONAL LEFT), IF IT IS WITHIN BOUNDS, AND IF IT HAS A PIECE
-    else if (destination == location - 6 && 0 <= (location - 6) && (location - 6) <= 24 && bp_ptr[location - 6] != 'e')
-    {
-        // TODO: ADD A CHECK IF IT WAS KING THAT WAS SWALLOWED
-        bp_ptr[location] = 'e';
-        bp_ptr[destination] = 'P';
-        return 1;
-    }
-    else
-    {
-        return 0;
-    }
-}
 
-int black_pawn_movement(char *bp_ptr, int location, int destination)
-{
-    // CHECK IF DESTINATION IS LOGICAL (STRAIGHT DOWN), IF IT IS WITHIN BOUNDS, AND IF IT IS EMPTY
-    if (destination == location + 5 && 0 <= (location + 5) && (location + 5) <= 24 && bp_ptr[location + 5] == 'e')
+    if (d_row + 1 == l_row)
     {
-        bp_ptr[location] = 'e';
-        bp_ptr[destination] = 'p';
-        return 1;
-    }
-    // CHECK IF DESTINATION IS LOGICAL (DIAGONAL LEFT), IF IT IS WITHIN BOUNDS, AND IF IT HAS A PIECE
-    else if (destination == location + 4 && 0 <= (location + 4) && (location + 4) <= 24 && bp_ptr[location + 4] != 'e')
-    {
-        // TODO: ADD A CHECK IF IT WAS KING OR AN OWN PIECE THAT WAS SWALLOWED
-        bp_ptr[location] = 'e';
-        bp_ptr[destination] = 'p';
-        return 1;
-    }
-    // CHECK IF DESTINATION IS LOGICAL (DIAGONAL RIGHT), IF IT IS WITHIN BOUNDS, AND IF IT HAS A PIECE
-    else if (destination == location + 6 && 0 <= (location + 6) && (location + 6) <= 24 && bp_ptr[location + 6] != 'e')
-    {
-        // TODO: ADD A CHECK IF IT WAS KING OR AN OWN PIECE THAT WAS SWALLOWED
-        bp_ptr[location] = 'e';
-        bp_ptr[destination] = 'p';
-        return 1;
-    }
-    else
-    {
-        return 0;
-    }
-}
+        int location = ret_int(l_row, l_col);
+        int destination = ret_int(d_row, d_col);
 
-int rook_movement(char *bp_ptr, int location, int destination)
-{
-    // VERTICAL CHECK
-    if (destination % 5 == location % 5 && destination != location)
-    {
-        // CHECK FOR OBSTACLES IN THE PATH HERE
-        int i;
-        for (i = -6; i < 6; ++i)
+        int validifier = abs(d_col - l_col);
+
+        if (validifier == 0)
         {
-            //IDK WHY BUT NOT SURE IF ABS IS WORKING HERE
-            int unabs_temp_location = location + (5 * i);
-            int temp_location = abs(unabs_temp_location);
+            bp_ptr[destination] = bp_ptr[location];
+            bp_ptr[location] = 'e';
+            return 1;
+        }
+        else if (validifier == 1 && bp_ptr[destination] != 'e')
+        {
+            // TODO: ADD A CHECK IF IT WAS KING OR OWN PIECE THAT WAS SWALLOWED
+            bp_ptr[destination] = bp_ptr[location];
+            bp_ptr[location] = 'e';
+            return 1;
+        }
+    }
 
-            if (location > destination)
+    return 0;
+}
+
+int black_pawn_movement(char *bp_ptr, int l_row, int l_col, int d_row, int d_col)
+{
+    if (d_row - 1 == l_row)
+    {
+        int location = ret_int(l_row, l_col);
+        int destination = ret_int(d_row, d_col);
+
+        int validifier = abs(d_col - l_col);
+
+        if (validifier == 0)
+        {
+            bp_ptr[destination] = bp_ptr[location];
+            bp_ptr[location] = 'e';
+            return 1;
+        }
+        else if (validifier == 1 && bp_ptr[destination] != 'e')
+        {
+            // TODO: ADD A CHECK IF IT WAS KING OR OWN PIECE THAT WAS SWALLOWED
+            bp_ptr[destination] = bp_ptr[location];
+            bp_ptr[location] = 'e';
+            return 1;
+        }
+    }
+
+    return 0;
+}
+
+int rook_movement(char *bp_ptr, int l_row, int l_col, int d_row, int d_col)
+{
+    int location = ret_int(l_row, l_col);
+    int destination = ret_int(d_row, d_col);
+
+    if (l_row == d_row)
+    {
+        int going_right;
+        if(l_col > d_col){going_right = 0;}
+        else{going_right = 1;}
+        
+        int i;
+        for (i = 1; i <= abs(l_col-d_col); ++i)
+        {
+            if(going_right)
             {
-                if (location > temp_location && temp_location > destination)
-                {
-                    if (bp_ptr[temp_location] != 'e')
-                    {
-                        printf("error, path not empty");
-                        return 0;
-                    }
-                }
+                if(bp_ptr[ret_int(l_row, l_col+i)] != 'e'){return 0;}
             }
             else
             {
-                if (location < temp_location && temp_location < destination)
-                {
-                    if (bp_ptr[temp_location] != 'e')
-                    {
-                        printf("error, path not empty");
-                        return 0;
-                    }
-                }
+                if(bp_ptr[ret_int(l_row, l_col-i)] != 'e'){return 0;}
             }
         }
 
-        // TODO: CHECK IF YOU ARE EATING YOUR OWN PIECE OR KING AND THROW ERROR
-        
-
-        // IF NO ERRORS HAPPENED IN THE VERTICAL MOVEMENT, YOU CAN MOVE
         bp_ptr[destination] = bp_ptr[location];
         bp_ptr[location] = 'e';
-
-        // RETURN SUCCESS
         return 1;
     }
-
-    // TODO: HORIZONTAL CHECK
-    else if (destination != location && ((location/5) == (destination/5)))
+    else if (l_col == d_col)
     {
-        // TODO: CHECK FOR IN BETWEENS
+        printf("same column");
+        int going_up;
+        if(l_row > d_row){going_up = 1;}
+        else{going_up = 0;}
+        
+        int i;
+        for (i = 1; i < abs(l_row-d_row); ++i)
+        {
+            if(going_up)
+            {
+                if(bp_ptr[ret_int(l_row-i, l_col)] != 'e'){return 0;}
+            }
+            else
+            {
+                if(bp_ptr[ret_int(l_row+i, l_col)] != 'e'){return 0;}
+            }
+        }
 
-        // TODO: CHECK IF YOU ARE EATING YOUR OWN PIECE OR KING AND THROW ERROR
-
-        // IF NO ERRORS HAPPENED IN THE VERTICAL MOVEMENT, YOU CAN MOVE
         bp_ptr[destination] = bp_ptr[location];
         bp_ptr[location] = 'e';
-
-        // RETURN SUCCESS
         return 1;
     }
     else
@@ -382,25 +377,169 @@ int knight_movement(char *bp_ptr, int location, int destination)
     }
 }
 
-int bishop_movement(char *bp_ptr, int location, int destination)
+int bishop_movement(char *bp_ptr, int l_row, int l_col, int d_row, int d_col)
 {
 
-    int location_row = location/5;
-    int location_col = location%5;
-    int destination_row = destination/5;
-    int destination_col = destination%5;;
+    int location = ret_int(l_row, l_col);
+    int destination = ret_int(d_row, d_col);
 
-    if(abs(destination_row - location_row) == abs(destination_col-location_col))
+
+    if (abs(d_row - l_row) == abs(d_col - l_col))
     {
-    // TODO: CHECK FOR IN BETWEENS
+        //CHECKING FOR IN BETWEENS
+        int going_right;
+        int going_down;
 
-    // TODO: CHECK IF YOU ARE EATING YOUR OWN PIECE OR KING AND THROW ERROR
+        if(d_row > l_row){going_down = 1;}
+        else{going_down = 0;}
 
-    // IF NO ERRORS HAPPENED IN THE MOVEMENT, YOU CAN MOVE
-    bp_ptr[destination] = bp_ptr[location];
-    bp_ptr[location] = 'e';
+        if(d_col > l_col){going_right = 1;}
+        else{going_right = 0;}       
 
-    return 1;
+        int i;
+
+        for (i = 1; i < abs(l_row-d_row); ++i)
+        {
+            if(going_right)
+            {
+                if(going_down)
+                {
+                    if(bp_ptr[ret_int(l_row+i, l_col+i)] != 'e'){return 0;}
+                }
+                else
+                {
+                    if(bp_ptr[ret_int(l_row-i, l_col+i)] != 'e'){return 0;}
+                }
+            }
+            else
+            {
+                if(going_down)
+                {
+                    if(bp_ptr[ret_int(l_row+i, l_col-i)] != 'e'){return 0;}
+                }
+                else
+                {
+                    if(bp_ptr[ret_int(l_row-i, l_col-i)] != 'e'){return 0;}
+                }
+            }
+        }
+
+        // TODO: CHECK IF YOU ARE EATING YOUR OWN PIECE OR KING AND THROW ERROR
+
+        // IF NO ERRORS HAPPENED IN THE MOVEMENT, YOU CAN MOVE
+        bp_ptr[destination] = bp_ptr[location];
+        bp_ptr[location] = 'e';
+
+        return 1;
+    }
+
+    else
+    {
+        return 0;
+    }
+}
+
+int queen_movement(char *bp_ptr, int l_row, int l_col, int d_row, int d_col)
+{
+    int location = ret_int(l_row, l_col);
+    int destination = ret_int(d_row, d_col);
+
+    // JUST A COPY PASTE OF ROOK AND BISHOP
+
+    if (l_row == d_row)
+    {
+        int going_right;
+        if(l_col > d_col){going_right = 0;}
+        else{going_right = 1;}
+        
+        int i;
+        for (i = 1; i <= abs(l_col-d_col); ++i)
+        {
+            if(going_right)
+            {
+                if(bp_ptr[ret_int(l_row, l_col+i)] != 'e'){return 0;}
+            }
+            else
+            {
+                if(bp_ptr[ret_int(l_row, l_col-i)] != 'e'){return 0;}
+            }
+        }
+
+        bp_ptr[destination] = bp_ptr[location];
+        bp_ptr[location] = 'e';
+        return 1;
+    }
+    else if (l_col == d_col)
+    {
+        printf("same column");
+        int going_up;
+        if(l_row > d_row){going_up = 1;}
+        else{going_up = 0;}
+        
+        int i;
+        for (i = 1; i < abs(l_row-d_row); ++i)
+        {
+            if(going_up)
+            {
+                if(bp_ptr[ret_int(l_row-i, l_col)] != 'e'){return 0;}
+            }
+            else
+            {
+                if(bp_ptr[ret_int(l_row+i, l_col)] != 'e'){return 0;}
+            }
+        }
+
+        bp_ptr[destination] = bp_ptr[location];
+        bp_ptr[location] = 'e';
+        return 1;
+    }
+    else if (abs(d_row - l_row) == abs(d_col - l_col))
+    {
+        //CHECKING FOR IN BETWEENS
+        int going_right;
+        int going_down;
+
+        if(d_row > l_row){going_down = 1;}
+        else{going_down = 0;}
+
+        if(d_col > l_col){going_right = 1;}
+        else{going_right = 0;}       
+
+        int i;
+
+        for (i = 1; i < abs(l_row-d_row); ++i)
+        {
+            if(going_right)
+            {
+                if(going_down)
+                {
+                    if(bp_ptr[ret_int(l_row+i, l_col+i)] != 'e'){return 0;}
+                }
+                else
+                {
+                    if(bp_ptr[ret_int(l_row-i, l_col+i)] != 'e'){return 0;}
+                }
+            }
+            else
+            {
+                if(going_down)
+                {
+                    if(bp_ptr[ret_int(l_row+i, l_col-i)] != 'e'){return 0;}
+                }
+                else
+                {
+                    if(bp_ptr[ret_int(l_row-i, l_col-i)] != 'e'){return 0;}
+                }
+            }
+        }
+
+        // TODO: CHECK IF YOU ARE EATING YOUR OWN PIECE OR KING AND THROW ERROR
+
+        // IF NO ERRORS HAPPENED IN THE MOVEMENT, YOU CAN MOVE
+        bp_ptr[destination] = bp_ptr[location];
+        bp_ptr[location] = 'e';
+
+        return 1;
     }
 
     else
@@ -410,10 +549,6 @@ int bishop_movement(char *bp_ptr, int location, int destination)
 
 }
 
-int queen_movement(char *bp_ptr, int location, int destination)
-{
-}
-
-int king_movement(char *bp_ptr, int location, int destination)
+int king_movement(char *bp_ptr, int l_row, int l_col, int d_row, int d_col)
 {
 }
