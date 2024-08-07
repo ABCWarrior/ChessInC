@@ -20,21 +20,24 @@ int ret_int(int row, int col)
 
 void print_board(char *bp_ptr, int turn)
 {
-    printf("\n------");
+    printf("\n--A B C D E--");
 
     // Loops from 0-24 and prints the int value of the bp_ptr array there
     int i;
     for (i = 0; i < 25; ++i)
     {
+
         if (i % 5 == 0)
         {
             printf("\n");
+            printf("%d ", ((i/5)+1));
+
         }
-        printf("%c", bp_ptr[i]);
+        printf("%c ", bp_ptr[i]);
     }
 
     // Information about int -> piece here
-    printf("\n------");
+    printf("\n-------------");
     printf("\n p = pawn, k = king, q = queen, b = bishop, n = knight, r = rook : Lowercase is Black, Caps are White");
 
     // After printing, asks for input
@@ -61,7 +64,7 @@ void take_selection_input(char *bp_ptr, int turn)
     // TODO:
     // Return the position of the piece and whether it is valid to move
 
-    if (selected != 'e')
+    if (selected != 'x')
     {
 
         // Confirmed is a piece
@@ -135,7 +138,7 @@ char *set_pieces(char piece, int position, char *bp_ptr, char is_setup)
         int i;
         for (i = 0; i < 25; ++i)
         {
-            bp_ptr[i] = 'e';
+            bp_ptr[i] = 'x';
         }
     }
 
@@ -161,7 +164,7 @@ int main(void)
     // Pawn = 1, Rook = 2, Knight = 3, Bishop = 4, Queen = 5, King = 6
     char board_pieces[25];
     char *bp_ptr = board_pieces;
-    set_pieces('e', 0, bp_ptr, 'y');
+    set_pieces('x', 0, bp_ptr, 'y');
 
     int turnnumber = 1;
 
@@ -214,8 +217,14 @@ int valid_movement(char *bp_ptr, int location, int destination, int turn)
     int destination_col = (destination % 5) + 1;
 
     // CHECK IF DESTINATION IS VALID
-    if(location == destination){return 0;}
-    if(24 < destination || 0 > destination){return 0;}
+    if (location == destination)
+    {
+        return 0;
+    }
+    if (24 < destination || 0 > destination)
+    {
+        return 0;
+    }
 
     switch (temp_piece)
     {
@@ -258,14 +267,27 @@ int white_pawn_movement(char *bp_ptr, int l_row, int l_col, int d_row, int d_col
         if (validifier == 0)
         {
             bp_ptr[destination] = bp_ptr[location];
-            bp_ptr[location] = 'e';
+            bp_ptr[location] = 'x';
             return 1;
         }
-        else if (validifier == 1 && bp_ptr[destination] != 'e')
+        else if (validifier == 1 && bp_ptr[destination] != 'x')
         {
-            // TODO: ADD A CHECK IF IT WAS KING OR OWN PIECE THAT WAS SWALLOWED
+            // CHECK IF IT WAS OWN PIECE THAT WAS SWALLOWED
+            if (isupper(bp_ptr[destination]) == isupper(bp_ptr[location]))
+            {
+                printf("\n cant eat teammates \n");
+                return 0;
+            }
+
+            // CHECK IF YOU WIN!
+            if (bp_ptr[location] == 'K' || bp_ptr[location] == 'k')
+            {
+                printf("\n WINNER \n");
+                return 0;
+            }
+
             bp_ptr[destination] = bp_ptr[location];
-            bp_ptr[location] = 'e';
+            bp_ptr[location] = 'x';
             return 1;
         }
     }
@@ -285,14 +307,26 @@ int black_pawn_movement(char *bp_ptr, int l_row, int l_col, int d_row, int d_col
         if (validifier == 0)
         {
             bp_ptr[destination] = bp_ptr[location];
-            bp_ptr[location] = 'e';
+            bp_ptr[location] = 'x';
             return 1;
         }
-        else if (validifier == 1 && bp_ptr[destination] != 'e')
+        else if (validifier == 1 && bp_ptr[destination] != 'x')
         {
-            // TODO: ADD A CHECK IF IT WAS KING OR OWN PIECE THAT WAS SWALLOWED
+            // CHECK IF IT WAS OWN PIECE THAT WAS SWALLOWED
+            if (isupper(bp_ptr[destination]) == isupper(bp_ptr[location]))
+            {
+                printf("\n cant eat teammates \n");
+                return 0;
+            }
+
+            // CHECK IF YOU WIN!
+            if (bp_ptr[location] == 'K' || bp_ptr[location] == 'k')
+            {
+                printf("\n WINNER \n");
+                return 0;
+            }
             bp_ptr[destination] = bp_ptr[location];
-            bp_ptr[location] = 'e';
+            bp_ptr[location] = 'x';
             return 1;
         }
     }
@@ -308,48 +342,98 @@ int rook_movement(char *bp_ptr, int l_row, int l_col, int d_row, int d_col)
     if (l_row == d_row)
     {
         int going_right;
-        if(l_col > d_col){going_right = 0;}
-        else{going_right = 1;}
-        
-        int i;
-        for (i = 1; i <= abs(l_col-d_col); ++i)
+        if (l_col > d_col)
         {
-            if(going_right)
+            going_right = 0;
+        }
+        else
+        {
+            going_right = 1;
+        }
+
+        int i;
+        for (i = 1; i <= abs(l_col - d_col); ++i)
+        {
+            if (going_right)
             {
-                if(bp_ptr[ret_int(l_row, l_col+i)] != 'e'){return 0;}
+                if (bp_ptr[ret_int(l_row, l_col + i)] != 'x')
+                {
+                    return 0;
+                }
             }
             else
             {
-                if(bp_ptr[ret_int(l_row, l_col-i)] != 'e'){return 0;}
+                if (bp_ptr[ret_int(l_row, l_col - i)] != 'x')
+                {
+                    return 0;
+                }
             }
+        }
+        // CHECK IF IT WAS OWN PIECE THAT WAS SWALLOWED
+        if (isupper(bp_ptr[destination]) == isupper(bp_ptr[location]))
+        {
+            printf("\n cant eat teammates \n");
+            return 0;
+        }
+
+        // CHECK IF YOU WIN!
+        if (bp_ptr[location] == 'K' || bp_ptr[location] == 'k')
+        {
+            printf("\n WINNER \n");
+            return 0;
         }
 
         bp_ptr[destination] = bp_ptr[location];
-        bp_ptr[location] = 'e';
+        bp_ptr[location] = 'x';
         return 1;
     }
     else if (l_col == d_col)
     {
         printf("same column");
         int going_up;
-        if(l_row > d_row){going_up = 1;}
-        else{going_up = 0;}
-        
-        int i;
-        for (i = 1; i < abs(l_row-d_row); ++i)
+        if (l_row > d_row)
         {
-            if(going_up)
+            going_up = 1;
+        }
+        else
+        {
+            going_up = 0;
+        }
+
+        int i;
+        for (i = 1; i < abs(l_row - d_row); ++i)
+        {
+            if (going_up)
             {
-                if(bp_ptr[ret_int(l_row-i, l_col)] != 'e'){return 0;}
+                if (bp_ptr[ret_int(l_row - i, l_col)] != 'x')
+                {
+                    return 0;
+                }
             }
             else
             {
-                if(bp_ptr[ret_int(l_row+i, l_col)] != 'e'){return 0;}
+                if (bp_ptr[ret_int(l_row + i, l_col)] != 'x')
+                {
+                    return 0;
+                }
             }
+        }
+        // CHECK IF IT WAS OWN PIECE THAT WAS SWALLOWED
+        if (isupper(bp_ptr[destination]) == isupper(bp_ptr[location]))
+        {
+            printf("\n cant eat teammates \n");
+            return 0;
+        }
+
+        // CHECK IF YOU WIN!
+        if (bp_ptr[location] == 'K' || bp_ptr[location] == 'k')
+        {
+            printf("\n WINNER \n");
+            return 0;
         }
 
         bp_ptr[destination] = bp_ptr[location];
-        bp_ptr[location] = 'e';
+        bp_ptr[location] = 'x';
         return 1;
     }
     else
@@ -364,11 +448,23 @@ int knight_movement(char *bp_ptr, int location, int destination)
     int validation = abs(location - destination);
     if (validation == 3 || validation == 7 || validation == 9 || validation == 11)
     {
-        // TODO: CHECK IF YOU ARE EATING YOUR OWN PIECE OR KING AND THROW ERROR
+        // CHECK IF IT WAS OWN PIECE THAT WAS SWALLOWED
+        if (isupper(bp_ptr[destination]) == isupper(bp_ptr[location]))
+        {
+            printf("\n cant eat teammates \n");
+            return 0;
+        }
+
+        // CHECK IF YOU WIN!
+        if (bp_ptr[location] == 'K' || bp_ptr[location] == 'k')
+        {
+            printf("\n WINNER \n");
+            return 0;
+        }
 
         // IF NO ERRORS HAPPENED IN THE MOVEMENT, YOU CAN MOVE
         bp_ptr[destination] = bp_ptr[location];
-        bp_ptr[location] = 'e';
+        bp_ptr[location] = 'x';
         return 1;
     }
     else
@@ -383,52 +479,87 @@ int bishop_movement(char *bp_ptr, int l_row, int l_col, int d_row, int d_col)
     int location = ret_int(l_row, l_col);
     int destination = ret_int(d_row, d_col);
 
-
     if (abs(d_row - l_row) == abs(d_col - l_col))
     {
-        //CHECKING FOR IN BETWEENS
+        // CHECKING FOR IN BETWEENS
         int going_right;
         int going_down;
 
-        if(d_row > l_row){going_down = 1;}
-        else{going_down = 0;}
+        if (d_row > l_row)
+        {
+            going_down = 1;
+        }
+        else
+        {
+            going_down = 0;
+        }
 
-        if(d_col > l_col){going_right = 1;}
-        else{going_right = 0;}       
+        if (d_col > l_col)
+        {
+            going_right = 1;
+        }
+        else
+        {
+            going_right = 0;
+        }
 
         int i;
 
-        for (i = 1; i < abs(l_row-d_row); ++i)
+        for (i = 1; i < abs(l_row - d_row); ++i)
         {
-            if(going_right)
+            if (going_right)
             {
-                if(going_down)
+                if (going_down)
                 {
-                    if(bp_ptr[ret_int(l_row+i, l_col+i)] != 'e'){return 0;}
+                    if (bp_ptr[ret_int(l_row + i, l_col + i)] != 'x')
+                    {
+                        return 0;
+                    }
                 }
                 else
                 {
-                    if(bp_ptr[ret_int(l_row-i, l_col+i)] != 'e'){return 0;}
+                    if (bp_ptr[ret_int(l_row - i, l_col + i)] != 'x')
+                    {
+                        return 0;
+                    }
                 }
             }
             else
             {
-                if(going_down)
+                if (going_down)
                 {
-                    if(bp_ptr[ret_int(l_row+i, l_col-i)] != 'e'){return 0;}
+                    if (bp_ptr[ret_int(l_row + i, l_col - i)] != 'x')
+                    {
+                        return 0;
+                    }
                 }
                 else
                 {
-                    if(bp_ptr[ret_int(l_row-i, l_col-i)] != 'e'){return 0;}
+                    if (bp_ptr[ret_int(l_row - i, l_col - i)] != 'x')
+                    {
+                        return 0;
+                    }
                 }
             }
         }
 
-        // TODO: CHECK IF YOU ARE EATING YOUR OWN PIECE OR KING AND THROW ERROR
+        // CHECK IF IT WAS OWN PIECE THAT WAS SWALLOWED
+        if (isupper(bp_ptr[destination]) == isupper(bp_ptr[location]))
+        {
+            printf("\n cant eat teammates \n");
+            return 0;
+        }
+
+        // CHECK IF YOU WIN!
+        if (bp_ptr[location] == 'K' || bp_ptr[location] == 'k')
+        {
+            printf("\n WINNER \n");
+            return 0;
+        }
 
         // IF NO ERRORS HAPPENED IN THE MOVEMENT, YOU CAN MOVE
         bp_ptr[destination] = bp_ptr[location];
-        bp_ptr[location] = 'e';
+        bp_ptr[location] = 'x';
 
         return 1;
     }
@@ -449,95 +580,181 @@ int queen_movement(char *bp_ptr, int l_row, int l_col, int d_row, int d_col)
     if (l_row == d_row)
     {
         int going_right;
-        if(l_col > d_col){going_right = 0;}
-        else{going_right = 1;}
-        
-        int i;
-        for (i = 1; i <= abs(l_col-d_col); ++i)
+        if (l_col > d_col)
         {
-            if(going_right)
+            going_right = 0;
+        }
+        else
+        {
+            going_right = 1;
+        }
+
+        int i;
+        for (i = 1; i <= abs(l_col - d_col); ++i)
+        {
+            if (going_right)
             {
-                if(bp_ptr[ret_int(l_row, l_col+i)] != 'e'){return 0;}
+                if (bp_ptr[ret_int(l_row, l_col + i)] != 'x')
+                {
+                    return 0;
+                }
             }
             else
             {
-                if(bp_ptr[ret_int(l_row, l_col-i)] != 'e'){return 0;}
+                if (bp_ptr[ret_int(l_row, l_col - i)] != 'x')
+                {
+                    return 0;
+                }
             }
+        }
+        // CHECK IF IT WAS OWN PIECE THAT WAS SWALLOWED
+        if (isupper(bp_ptr[destination]) == isupper(bp_ptr[location]))
+        {
+            printf("\n cant eat teammates \n");
+            return 0;
+        }
+
+        // CHECK IF YOU WIN!
+        if (bp_ptr[location] == 'K' || bp_ptr[location] == 'k')
+        {
+            printf("\n WINNER \n");
+            return 0;
         }
 
         bp_ptr[destination] = bp_ptr[location];
-        bp_ptr[location] = 'e';
+        bp_ptr[location] = 'x';
         return 1;
     }
     else if (l_col == d_col)
     {
         printf("same column");
         int going_up;
-        if(l_row > d_row){going_up = 1;}
-        else{going_up = 0;}
-        
-        int i;
-        for (i = 1; i < abs(l_row-d_row); ++i)
+        if (l_row > d_row)
         {
-            if(going_up)
+            going_up = 1;
+        }
+        else
+        {
+            going_up = 0;
+        }
+
+        int i;
+        for (i = 1; i < abs(l_row - d_row); ++i)
+        {
+            if (going_up)
             {
-                if(bp_ptr[ret_int(l_row-i, l_col)] != 'e'){return 0;}
+                if (bp_ptr[ret_int(l_row - i, l_col)] != 'x')
+                {
+                    return 0;
+                }
             }
             else
             {
-                if(bp_ptr[ret_int(l_row+i, l_col)] != 'e'){return 0;}
+                if (bp_ptr[ret_int(l_row + i, l_col)] != 'x')
+                {
+                    return 0;
+                }
             }
+        }
+        // CHECK IF IT WAS OWN PIECE THAT WAS SWALLOWED
+        if (isupper(bp_ptr[destination]) == isupper(bp_ptr[location]))
+        {
+            printf("\n cant eat teammates \n");
+            return 0;
+        }
+
+        // CHECK IF YOU WIN!
+        if (bp_ptr[location] == 'K' || bp_ptr[location] == 'k')
+        {
+            printf("\n WINNER \n");
+            return 0;
         }
 
         bp_ptr[destination] = bp_ptr[location];
-        bp_ptr[location] = 'e';
+        bp_ptr[location] = 'x';
         return 1;
     }
     else if (abs(d_row - l_row) == abs(d_col - l_col))
     {
-        //CHECKING FOR IN BETWEENS
+        // CHECKING FOR IN BETWEENS
         int going_right;
         int going_down;
 
-        if(d_row > l_row){going_down = 1;}
-        else{going_down = 0;}
+        if (d_row > l_row)
+        {
+            going_down = 1;
+        }
+        else
+        {
+            going_down = 0;
+        }
 
-        if(d_col > l_col){going_right = 1;}
-        else{going_right = 0;}       
+        if (d_col > l_col)
+        {
+            going_right = 1;
+        }
+        else
+        {
+            going_right = 0;
+        }
 
         int i;
 
-        for (i = 1; i < abs(l_row-d_row); ++i)
+        for (i = 1; i < abs(l_row - d_row); ++i)
         {
-            if(going_right)
+            if (going_right)
             {
-                if(going_down)
+                if (going_down)
                 {
-                    if(bp_ptr[ret_int(l_row+i, l_col+i)] != 'e'){return 0;}
+                    if (bp_ptr[ret_int(l_row + i, l_col + i)] != 'x')
+                    {
+                        return 0;
+                    }
                 }
                 else
                 {
-                    if(bp_ptr[ret_int(l_row-i, l_col+i)] != 'e'){return 0;}
+                    if (bp_ptr[ret_int(l_row - i, l_col + i)] != 'x')
+                    {
+                        return 0;
+                    }
                 }
             }
             else
             {
-                if(going_down)
+                if (going_down)
                 {
-                    if(bp_ptr[ret_int(l_row+i, l_col-i)] != 'e'){return 0;}
+                    if (bp_ptr[ret_int(l_row + i, l_col - i)] != 'x')
+                    {
+                        return 0;
+                    }
                 }
                 else
                 {
-                    if(bp_ptr[ret_int(l_row-i, l_col-i)] != 'e'){return 0;}
+                    if (bp_ptr[ret_int(l_row - i, l_col - i)] != 'x')
+                    {
+                        return 0;
+                    }
                 }
             }
         }
 
-        // TODO: CHECK IF YOU ARE EATING YOUR OWN PIECE OR KING AND THROW ERROR
+        // CHECK IF IT WAS OWN PIECE THAT WAS SWALLOWED
+        if (isupper(bp_ptr[destination]) == isupper(bp_ptr[location]))
+        {
+            printf("\n cant eat teammates \n");
+            return 0;
+        }
+
+        // CHECK IF YOU WIN!
+        if (bp_ptr[location] == 'K' || bp_ptr[location] == 'k')
+        {
+            printf("\n WINNER \n");
+            return 0;
+        }
 
         // IF NO ERRORS HAPPENED IN THE MOVEMENT, YOU CAN MOVE
         bp_ptr[destination] = bp_ptr[location];
-        bp_ptr[location] = 'e';
+        bp_ptr[location] = 'x';
 
         return 1;
     }
@@ -546,9 +763,9 @@ int queen_movement(char *bp_ptr, int l_row, int l_col, int d_row, int d_col)
     {
         return 0;
     }
-
 }
 
 int king_movement(char *bp_ptr, int l_row, int l_col, int d_row, int d_col)
 {
+
 }
