@@ -56,7 +56,6 @@ void take_selection_input(char *bp_ptr, int turn)
 
     printf("\n------");
 
-    // TODO: Input validation
 
     char input[3];
 
@@ -101,8 +100,6 @@ void take_selection_input(char *bp_ptr, int turn)
     // Use int row and int column to find the piece from 0-24
     selected = bp_ptr[(row - 1) * 5 + (column - 1)];
 
-    // TODO:
-    // Return the position of the piece and whether it is valid to move
 
     if (selected != 'x')
     {
@@ -116,7 +113,7 @@ void take_selection_input(char *bp_ptr, int turn)
         {
             if (isupper(selected))
             {
-                printf("%c is valid", selected);
+                //printf("%c is valid", selected);
                 // IF IT IS VALID, MOVE TO NEXT STEP; DECIDING WHERE TO MOVE
                 take_movement_input(bp_ptr, ((row - 1) * 5 + (column - 1)), turn);
                 return;
@@ -210,7 +207,7 @@ char *set_pieces(char piece, int position, char *bp_ptr, char is_setup)
 {
     // First check if being called for setup
     // If yes, then set the entire array to 0
-    // TODO: Might be able to remove the 'y' branch for optimization, but unsure right now
+    // Might be able to remove the 'y' branch for optimization
 
     if (is_setup == 'y')
     {
@@ -351,6 +348,9 @@ int white_pawn_movement(char *bp_ptr, int l_row, int l_col, int d_row, int d_col
         }
         else if (validifier == 1 && bp_ptr[destination] != 'x')
         {
+            // THIS STUFF REPEATEDLY GETS CALLED, CAN PROBABLY MOVE IT TO ANOTHER FUNCTION
+            // TODO: TIRED TONIGHT <- WILL MOVE TMRW
+            
             // CHECK IF IT WAS OWN PIECE THAT WAS SWALLOWED
             if (isupper(bp_ptr[destination]) == isupper(bp_ptr[location]))
             {
@@ -705,7 +705,6 @@ int queen_movement(char *bp_ptr, int l_row, int l_col, int d_row, int d_col)
     }
     else if (l_col == d_col)
     {
-        printf("same column");
         int going_up;
         if (l_row > d_row)
         {
