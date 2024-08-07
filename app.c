@@ -304,7 +304,10 @@ int rook_movement(char *bp_ptr, int location, int destination)
         int i;
         for (i = -6; i < 6; ++i)
         {
-            int temp_location = abs(location + (5 * i));
+            //IDK WHY BUT NOT SURE IF ABS IS WORKING HERE
+            int unabs_temp_location = location + (5 * i);
+            int temp_location = abs(unabs_temp_location);
+
             if (location > destination)
             {
                 if (location > temp_location && temp_location > destination)
@@ -362,10 +365,49 @@ int rook_movement(char *bp_ptr, int location, int destination)
 
 int knight_movement(char *bp_ptr, int location, int destination)
 {
+    // CHECKS IF THAT SPACE IS VALID (MAGIC MATH RIGHT HERE)
+    int validation = abs(location - destination);
+    if (validation == 3 || validation == 7 || validation == 9 || validation == 11)
+    {
+        // TODO: CHECK IF YOU ARE EATING YOUR OWN PIECE OR KING AND THROW ERROR
+
+        // IF NO ERRORS HAPPENED IN THE MOVEMENT, YOU CAN MOVE
+        bp_ptr[destination] = bp_ptr[location];
+        bp_ptr[location] = 'e';
+        return 1;
+    }
+    else
+    {
+        return 0;
+    }
 }
 
 int bishop_movement(char *bp_ptr, int location, int destination)
 {
+
+    int location_row = location/5;
+    int location_col = location%5;
+    int destination_row = destination/5;
+    int destination_col = destination%5;;
+
+    if(abs(destination_row - location_row) == abs(destination_col-location_col))
+    {
+    // TODO: CHECK FOR IN BETWEENS
+
+    // TODO: CHECK IF YOU ARE EATING YOUR OWN PIECE OR KING AND THROW ERROR
+
+    // IF NO ERRORS HAPPENED IN THE MOVEMENT, YOU CAN MOVE
+    bp_ptr[destination] = bp_ptr[location];
+    bp_ptr[location] = 'e';
+
+    return 1;
+    }
+
+    else
+    {
+        return 0;
+    }
+
 }
 
 int queen_movement(char *bp_ptr, int location, int destination)
